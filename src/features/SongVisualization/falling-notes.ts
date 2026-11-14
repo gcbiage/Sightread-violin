@@ -312,6 +312,9 @@ function getItemStartEnd(item: CanvasItem, state: State): { start: number; end: 
 // TODO figure out a less shit way of sharing measurements
 // for hit detection. most of the state is irrelevant to the rest of the world.
 let lastState: State | null = null
+export function resetPianoHitArea() {
+  lastState = null
+}
 export function intersectsWithPiano(y: number): boolean {
   if (!lastState) return false
   return y >= lastState.pianoTopY

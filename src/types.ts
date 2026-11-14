@@ -85,7 +85,7 @@ export type Song = {
 }
 
 export type Clef = 'bass' | 'treble'
-export type VisualizationMode = 'falling-notes' | 'sheet'
+export type VisualizationMode = 'falling-notes' | 'sheet' | 'violin'
 export type Hand = 'both' | 'left' | 'right' | 'none'
 export type SongConfig = {
   left: boolean

@@ -39,19 +39,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/favicon.ico" />
 
-        {/* Global Site Tag (gtag.js) - Google Analytics */}
-        <script defer src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`} />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
+        {/* Global Site Tag (gtag.js) - Google Analytics (only when VITE_PUBLIC_GA_ID is set) */}
+        {GA_TRACKING_ID && (
+          <>
+            <script defer src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', '${GA_TRACKING_ID}', {
       page_path: window.location.pathname,
     });`,
-          }}
-        />
+              }}
+            />
+          </>
+        )}
 
         {/* Manually inserted styles */}
         <style dangerouslySetInnerHTML={{ __html: styles }} />

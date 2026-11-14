@@ -24,3 +24,6 @@ tsconfig.tsbuildinfo
 
 # downloaded soundfonts (see scripts/download-soundfonts.ts)
 public/soundfonts/
+
+# violin view snapshots (scripts/snapshot-violin.ts)
+/snapshots

@@ -83,7 +83,7 @@ export function getDefaultSongSettings(song?: Song): SongConfig {
     noteLabels: 'none',
     coloredNotes: false,
     skipMissedNotes: false,
-    visualization: 'falling-notes',
+    visualization: 'violin',
     tracks: {},
   }
   if (!song) {
@@ -172,7 +172,7 @@ function isMatchingHand(item: CanvasItem, state: GivenState) {
   const { hand, hands } = state
   switch (item.type) {
     case 'measure':
-      return state.visualization === 'falling-notes'
+      return state.visualization === 'falling-notes' || state.visualization === 'violin'
     case 'note':
       const showLeft = hand === 'both' || hand === 'left'
       if (showLeft && hands[item.track]?.hand === 'left') {

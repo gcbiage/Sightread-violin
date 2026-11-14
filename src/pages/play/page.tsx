@@ -320,11 +320,9 @@ export default function PlaySongPage() {
     } else if (evt.code === 'BracketRight') {
       setSongConfig({ ...songConfig, right: !songConfig.right })
     } else if (evt.shiftKey && evt.code === 'Quote') {
-      if (songConfig.visualization === 'falling-notes') {
-        setSongConfig({ ...songConfig, visualization: 'sheet' })
-      } else {
-        setSongConfig({ ...songConfig, visualization: 'falling-notes' })
-      }
+      const order = ['violin', 'falling-notes', 'sheet'] as const
+      const next = order[(order.indexOf(songConfig.visualization) + 1) % order.length]
+      setSongConfig({ ...songConfig, visualization: next })
     } else if (evt.code === 'Digit0') {
       player.seek(0)
     }
@@ -429,7 +427,7 @@ export default function PlaySongPage() {
             handSettings={getHandSettings(songConfig)}
             selectedRange={selectedRange}
             getTime={() => player.getTime()}
-            enableTouchscroll={songConfig.visualization === 'falling-notes'}
+            enableTouchscroll={songConfig.visualization !== 'sheet'}
           />
           {playerState.countingDown && countdownTotal > 0 && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">

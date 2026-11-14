@@ -1,15 +1,16 @@
 import { KEY_SIGNATURE, NOTE_LABELS } from '@/features/theory'
-import { Hand, HandSettings } from '@/types'
+import { Hand, HandSettings, VisualizationMode } from '@/types'
 import { Player } from '../player'
-import { renderFallingVis } from './falling-notes'
+import { renderFallingVis, resetPianoHitArea } from './falling-notes'
 import { renderSheetVis } from './sheet'
 import { CanvasItem } from './utils'
+import { renderViolinVis } from './violin'
 
 export type GivenState = {
   time: number
   noteLabels: NOTE_LABELS
   coloredNotes: boolean
-  visualization: 'falling-notes' | 'sheet'
+  visualization: VisualizationMode
   transpose: number
   windowWidth: number
   height: number
@@ -32,6 +33,12 @@ export type GivenState = {
 export function render(state: Readonly<GivenState>) {
   if (state.visualization === 'falling-notes') {
     renderFallingVis(state)
+    return
+  }
+  // Only the piano view has a keyboard that should capture pointer presses.
+  resetPianoHitArea()
+  if (state.visualization === 'violin') {
+    renderViolinVis(state)
   } else {
     renderSheetVis(state)
   }

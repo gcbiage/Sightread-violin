@@ -425,6 +425,7 @@ export default function SettingsPanel(props: SidebarProps) {
               selectedKey={visualization}
               onSelectionChange={(key) => handleVisualization(key as VisualizationMode)}
               items={[
+                { id: 'violin', name: 'Violin' },
                 { id: 'falling-notes', name: 'Falling notes' },
                 { id: 'sheet', name: 'Sheet hero (beta)' },
               ]}
