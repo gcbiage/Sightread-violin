@@ -37,7 +37,22 @@ export async function getSynth(
   }
 
   await loadInstrument(instrument)
+  if (!soundfonts[instrument]) {
+    // The sound could not be loaded: keep the song usable (visualization, loop, speed) in silence.
+    console.warn(`Soundfont for ${instrument} unavailable, playing it silently.`)
+    return new SilentSynth(instrument)
+  }
   return new InstrumentSynth(instrument, options)
+}
+
+class SilentSynth implements Synth {
+  constructor(private instrument: InstrumentName) {}
+  playNote() {}
+  stopNote() {}
+  setMasterVolume() {}
+  getInstrument(): InstrumentName {
+    return this.instrument
+  }
 }
 
 export function getSynthStub(

@@ -2,13 +2,27 @@ import { isBrowser } from '@/utils'
 import { atom, getDefaultStore } from 'jotai'
 import { getOctave } from '../theory'
 
+/**
+ * Extract the `{ "note": "data:audio/mp3;base64,..." }` object from a MIDI.js soundfont file.
+ * Works whether or not the last entry has a trailing comma (the soundfonts downloaded from the
+ * GitHub releases don't have one, which broke the previous `lastIndexOf(',')` approach).
+ */
+export function extractMidiJsSoundfontJson(text: string): { [key: string]: string } {
+  const marker = text.indexOf('MIDI.Soundfont.')
+  if (marker < 0) throw Error('Invalid MIDI.js Soundfont format')
+  const begin = text.indexOf('{', marker)
+  const end = text.lastIndexOf('}')
+  if (begin < 0 || end <= begin) throw Error('Invalid MIDI.js Soundfont format')
+  const body = text
+    .slice(begin, end + 1)
+    // Drop a trailing comma before the closing brace, which JSON doesn't allow.
+    .replace(/,\s*}$/, '}')
+  return JSON.parse(body)
+}
+
 // convert a MIDI.js javascript soundfont file to json
 async function parseMidiJsSoundfont(text: string): Promise<{ [key: string]: AudioBuffer }> {
-  var begin = text.indexOf('MIDI.Soundfont.')
-  if (begin < 0) throw Error('Invalid MIDI.js Soundfont format:')
-  begin = text.indexOf('=', begin) + 2
-  var end = text.lastIndexOf(',')
-  let json: { [key: string]: string } = JSON.parse(text.slice(begin, end) + '}')
+  const json = extractMidiJsSoundfontJson(text)
 
   const audioBufferPromises = Object.entries(json).map(async ([key, dataUri]) => {
     const base64 = dataUri.slice(dataUri.indexOf(',') + 1)

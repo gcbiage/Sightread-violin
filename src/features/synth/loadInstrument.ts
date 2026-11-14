@@ -23,9 +23,11 @@ export async function loadInstrument(instrument: InstrumentName) {
   try {
     let sf = await parseMidiJsSoundfont(await (await sfFetch).text())
     soundfonts[instrument] = sf
-    delete downloading[instrument]
-    doneDownloadingRes()
   } catch (err) {
     console.error(`Error fetching soundfont for: ${instrument}`, err)
+  } finally {
+    // Always settle, so callers waiting on an in-progress download never hang.
+    delete downloading[instrument]
+    doneDownloadingRes()
   }
 }
