@@ -221,6 +221,22 @@ export function getKey(note: number, keySignature: KEY_SIGNATURE = 'C'): string 
   return keyToNotes[keySignature][note % 12]
 }
 
+const SHARP_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+const FLAT_NAMES = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B']
+const FLAT_KEYS: KEY_SIGNATURE[] = ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb']
+
+/**
+ * The real name of a note, always with its accidental (e.g. F# is "F#" in every key).
+ *
+ * Unlike `getKey`, which names notes the way they are written on a staff with that key
+ * signature (in G major, F# is written as "F" because the sharp is in the signature), this is
+ * meant for labels that must stand on their own. Flat keys use flat names (B♭), others sharps.
+ */
+export function getNoteName(note: number, keySignature: KEY_SIGNATURE = 'C'): string {
+  const names = FLAT_KEYS.includes(keySignature) ? FLAT_NAMES : SHARP_NAMES
+  return names[((note % 12) + 12) % 12]
+}
+
 export function getOctave(note: number): number {
   return Math.floor((note - 12) / 12)
 }

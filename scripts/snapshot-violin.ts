@@ -4,7 +4,7 @@
  *
  *   bun scripts/snapshot-violin.ts [song.mid] [--times 1,4.5,10] [--out snapshots]
  *                                  [--size 1280x720] [--labels none|alphabetical|fixed-do]
- *                                  [--transpose 0]
+ *                                  [--transpose 0] [--key G]
  *
  * Without a MIDI file it renders a built-in test pattern: the chromatic range of the violin
  * (G3 … A#5) plus a few notes below and above it.
@@ -61,6 +61,7 @@ async function main() {
   const times = (getArg('times') ?? '0.5,3,7,12,15.5').split(',').map(Number)
   const noteLabels = (getArg('labels') ?? 'alphabetical') as any
   const transpose = Number(getArg('transpose') ?? 0)
+  const keyOverride = getArg('key') as any
 
   const bytes = file ? new Uint8Array(fs.readFileSync(file)) : buildTestPattern()
   const song: Song = parseMidi(bytes as Uint8Array<ArrayBuffer>)
@@ -91,7 +92,7 @@ async function main() {
       ctx,
       items: song.items,
       constrictView: true,
-      keySignature: song.keySignature ?? 'C',
+      keySignature: keyOverride ?? song.keySignature ?? 'C',
       timeSignature: song.timeSignature,
       canvasRect: { left: 0, top: 0 } as DOMRect,
       game: false,

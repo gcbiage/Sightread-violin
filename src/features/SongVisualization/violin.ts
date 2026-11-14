@@ -5,7 +5,13 @@
  * by `@/features/violin` (see `DEFAULT_VIOLIN_CONFIG`), so the rules can change independently.
  */
 import { line, roundRect } from '@/features/drawing'
-import { getFixedDoNoteFromKey, getKey, getOctave, isBlack, transposeMidi } from '@/features/theory'
+import {
+  getNoteName as getAbsoluteNoteName,
+  getFixedDoNoteFromKey,
+  getOctave,
+  isBlack,
+  transposeMidi,
+} from '@/features/theory'
 import {
   DEFAULT_VIOLIN_CONFIG,
   getBlockNumber,
@@ -123,7 +129,7 @@ function isPlaying(note: SongNote, state: State): boolean {
 }
 
 function getNoteName(midiNote: number, state: State, withOctave: boolean): string {
-  const key = getKey(midiNote, state.keySignature)
+  const key = getAbsoluteNoteName(midiNote, state.keySignature)
   const name = state.noteLabels === 'fixed-do' ? getFixedDoNoteFromKey(key) : key
   return withOctave ? `${name}${getOctave(midiNote)}` : name
 }

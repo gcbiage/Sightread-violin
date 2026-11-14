@@ -5,7 +5,13 @@ import {
   handlePianoRollMousePress,
   PianoRollMeasurements,
 } from '@/features/drawing/piano'
-import { getFixedDoNoteFromKey, getKey, isBlack, transposeMidi } from '@/features/theory'
+import {
+  getFixedDoNoteFromKey,
+  getKey,
+  getNoteName,
+  isBlack,
+  transposeMidi,
+} from '@/features/theory'
 import type { SongMeasure, SongNote } from '@/types'
 import { clamp } from '@/utils'
 import midiState from '../midi'
@@ -266,7 +272,8 @@ export function renderFallingNote(note: SongNote, state: State): void {
     ctx.fillStyle = 'white'
     ctx.strokeStyle = 'black'
     ctx.textBaseline = 'bottom'
-    const key = getKey(transposed, state.keySignature)
+    // Labels on falling notes stand alone, so always show the accidental.
+    const key = getNoteName(transposed, state.keySignature)
     const noteText = noteLabels === 'alphabetical' ? key : getFixedDoNoteFromKey(key)
     const padding = 1
     const maxWidth = width - padding * 2
