@@ -1,5 +1,5 @@
 import { DEFAULT_VIOLIN_CONFIG, ViolinConfig } from './config'
-import { getViolinLanes, placeViolinNote } from './placement'
+import { getBlockNumber, getViolinLanes, placeViolinNote } from './placement'
 
 const G3 = 55
 const C4 = 60
@@ -93,5 +93,28 @@ describe('placeViolinNote (custom configs)', () => {
       strings: DEFAULT_VIOLIN_CONFIG.strings.map((s) => ({ ...s, maxSemitones: 5 })),
     }
     expect(placeViolinNote(CS4, config)).toMatchObject({ stringIndex: 0, outOfRange: true })
+  })
+})
+
+describe('getBlockNumber', () => {
+  const num = (n: number, config = DEFAULT_VIOLIN_CONFIG) =>
+    getBlockNumber(placeViolinNote(n, config)!, config)
+
+  it('shows semitones above the open string by default (0 … 6)', () => {
+    // A string: A, A#, B, C, C#, D, D#
+    expect([69, 70, 71, 72, 73, 74, 75].map((n) => num(n))).toEqual([0, 1, 2, 3, 4, 5, 6])
+    // Sharps get their own number, distinct from the natural next to them.
+    expect(num(CS4)).toBe(6)
+    expect(num(C4)).toBe(5)
+  })
+
+  it('can show finger numbers instead', () => {
+    const config: ViolinConfig = { ...DEFAULT_VIOLIN_CONFIG, blockNumber: 'finger' }
+    expect([69, 70, 71, 72, 73, 74, 75].map((n) => num(n, config))).toEqual([0, 1, 1, 2, 2, 3, 3])
+  })
+
+  it('has no number for notes outside the strings range', () => {
+    expect(num(B5)).toBeNull()
+    expect(num(G3 - 1)).toBeNull()
   })
 })

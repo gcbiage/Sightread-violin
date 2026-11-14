@@ -20,6 +20,9 @@ export interface ViolinString {
   maxSemitones: number
 }
 
+/** What the number inside each falling block means. */
+export type BlockNumberMode = 'semitones' | 'finger'
+
 /** What to do with notes that no string covers. */
 export type BelowRangeMode = 'lane' | 'discard'
 export type AboveRangeMode = 'top-string' | 'lane' | 'discard'
@@ -27,6 +30,11 @@ export type AboveRangeMode = 'top-string' | 'lane' | 'discard'
 export interface ViolinConfig {
   /** Ordered from lowest to highest string (left → right on screen). */
   strings: ViolinString[]
+  /**
+   * 'semitones' → semitones above the open string (0 = open string … 6).
+   * 'finger'    → finger number from `fingerBySemitone` (0 = open string … 3).
+   */
+  blockNumber: BlockNumberMode
   /**
    * Finger used for each semitone offset above the open string (index = semitones).
    * Offsets past the end of this table have no finger number.
@@ -54,6 +62,7 @@ export const DEFAULT_VIOLIN_CONFIG: ViolinConfig = {
     { id: 'A', openMidi: 69, maxSemitones: 6 }, // A4 … D#5
     { id: 'E', openMidi: 76, maxSemitones: 6 }, // E5 … A#5
   ],
+  blockNumber: 'semitones',
   // 1st position: 0 = open, 1–2 = 1st finger (low/high), 3–4 = 2nd, 5–6 = 3rd, 7 = 4th.
   fingerBySemitone: [0, 1, 1, 2, 2, 3, 3, 4],
   belowRange: 'lane',

@@ -1,12 +1,14 @@
 /**
  * Violin visualization: notes fall onto the four strings (G, D, A, E) instead of piano keys.
- * Each falling block shows the finger to use (0 = open string). Where a note goes is decided
+ * Each falling block shows how many semitones above the open string to play (0 = open string),
+ * and sharps/flats are drawn in a different color, like the black keys of a piano. Where a note goes is decided
  * by `@/features/violin` (see `DEFAULT_VIOLIN_CONFIG`), so the rules can change independently.
  */
 import { line, roundRect } from '@/features/drawing'
-import { getFixedDoNoteFromKey, getKey, getOctave, transposeMidi } from '@/features/theory'
+import { getFixedDoNoteFromKey, getKey, getOctave, isBlack, transposeMidi } from '@/features/theory'
 import {
   DEFAULT_VIOLIN_CONFIG,
+  getBlockNumber,
   getViolinLanes,
   placeViolinNote,
   ViolinConfig,
@@ -39,13 +41,11 @@ const colors = {
   rangeSelectionFill: '#8b5cf6',
 }
 
-/** Block colors by finger, so the finger can be read at a glance (like white/black keys). */
-const FINGER_COLORS: Record<number, string> = {
-  0: '#2fb3a3', // open string
-  1: '#7b5ff0',
-  2: '#f08a5b',
-  3: '#e0559b',
-  4: '#d6b83a',
+/** Block colors: open strings, natural notes and sharps/flats (like a piano's white/black keys). */
+const NOTE_COLORS = {
+  open: '#2fb3a3',
+  natural: '#7b5ff0',
+  accidental: '#f08a5b',
 }
 
 const MAX_AREA_WIDTH = 1100
@@ -133,11 +133,14 @@ function getStringName(index: number, state: State): string {
   return state.noteLabels === 'fixed-do' ? getFixedDoNoteFromKey(string.id) : string.id
 }
 
-function getBlockColor(placement: ViolinPlacement): string {
-  if (placement.outOfRange || placement.finger === null) {
+function getBlockColor(placement: ViolinPlacement, midi: number): string {
+  if (placement.outOfRange) {
     return colors.outOfRange
   }
-  return FINGER_COLORS[placement.finger] ?? colors.outOfRange
+  if (placement.semitones === 0) {
+    return NOTE_COLORS.open
+  }
+  return isBlack(midi) ? NOTE_COLORS.accidental : NOTE_COLORS.natural
 }
 
 export function renderViolinVis(
@@ -253,17 +256,18 @@ function renderFallingNote(
   }
 
   ctx.save()
-  ctx.fillStyle = getBlockColor(placement)
+  ctx.fillStyle = getBlockColor(placement, midi)
   ctx.strokeStyle = colors.noteBorder
   ctx.lineWidth = 1
   roundRect(ctx, posX, posYTop, width, length, { topRadius: 6, bottomRadius: 6 })
 
-  // Label at the bottom of the block: finger number (big) and, optionally, the note name.
+  // Label at the bottom of the block: the number (big) and, optionally, the note name.
   // While a long note crosses the hit line, the label sticks just above the line.
   const bottom = Math.min(posYTop + length, state.noteHitY)
   const visibleLength = bottom - posYTop
   const showName = state.noteLabels !== 'none'
-  const fingerText = placement.finger !== null ? String(placement.finger) : ''
+  const blockNumber = getBlockNumber(placement, state.config)
+  const fingerText = blockNumber !== null ? String(blockNumber) : ''
   const nameText =
     showName || !fingerText ? getNoteName(midi, state, !isString || placement.outOfRange) : ''
 
@@ -310,7 +314,7 @@ function renderRange(state: State) {
   ctx.restore()
 }
 
-/** Bottom panel: one box per lane with the string name, lit with the finger while a note plays. */
+/** Bottom panel: one box per lane with the string name, lit with the number while a note plays. */
 function renderPanel(
   state: State,
   active: Map<string, { midi: number; placement: ViolinPlacement }>,
@@ -337,7 +341,9 @@ function renderPanel(
     const boxH = panelHeight - pad * 2
     const playing = active.get(laneKey(lane.lane))
 
-    ctx.fillStyle = playing ? getBlockColor(playing.placement) : 'rgba(255,255,255,0.04)'
+    ctx.fillStyle = playing
+      ? getBlockColor(playing.placement, playing.midi)
+      : 'rgba(255,255,255,0.04)'
     ctx.strokeStyle = 'rgba(255,255,255,0.06)'
     roundRect(ctx, boxX, boxY, boxW, boxH, { topRadius: 8, bottomRadius: 8 })
 
@@ -351,10 +357,10 @@ function renderPanel(
       const titlePx = Math.max(12, Math.min(Math.floor(boxH * 0.3), 26))
       const subPx = Math.max(9, Math.min(Math.floor(boxH * 0.16), 13))
       if (playing) {
-        const finger = playing.placement.finger
+        const blockNumber = getBlockNumber(playing.placement, state.config)
         ctx.fillStyle = 'white'
         ctx.font = `700 ${Math.floor(titlePx * 1.25)}px ${FONT}`
-        ctx.fillText(finger !== null ? String(finger) : '–', cx, boxY + boxH * 0.4)
+        ctx.fillText(blockNumber !== null ? String(blockNumber) : '–', cx, boxY + boxH * 0.4)
         ctx.font = `500 ${subPx}px ${FONT}`
         ctx.globalAlpha = 0.85
         ctx.fillText(

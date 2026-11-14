@@ -1,6 +1,6 @@
 # Sightread-violin
 
-Um fork do [Sightread](https://github.com/sightread/sightread) com uma visualização feita para **tocar violino**: as notas caem sobre as quatro cordas (Sol, Ré, Lá, Mi), no lugar das teclas do piano, e cada bloco mostra o dedo a usar.
+Um fork do [Sightread](https://github.com/sightread/sightread) com uma visualização feita para **tocar violino**: as notas caem sobre as quatro cordas (Sol, Ré, Lá, Mi), no lugar das teclas do piano, e cada bloco mostra quantos semitons acima da corda solta tocar.
 
 ![Visão de violino](docs/violin-view.png)
 
@@ -20,11 +20,12 @@ Um fork do [Sightread](https://github.com/sightread/sightread) com uma visualiza
   | Lá (A4) | A4 – D♯5 |
   | Mi (E5) | E5 – A♯5 |
 
-- **Dedos:** o número dentro do bloco é o dedo. 0 é a corda solta, 1–2 semitons usam o 1º dedo, 3–4 o 2º e 5–6 o 3º. A cor também indica o dedo: verde = solta, roxo = 1, laranja = 2, rosa = 3.
+- **Número no bloco:** quantos **semitons** acima da corda solta tocar, de 0 (corda solta) a 6. Exemplo na corda Lá: A = 0, A♯ = 1, B = 2, C = 3, C♯ = 4, D = 5, D♯ = 6.
+- **Cores:** verde = corda solta, roxo = nota natural, laranja = sustenido/bemol (como as teclas pretas do piano).
 - **Fora da extensão:**
   - Notas abaixo de G3 não existem no violino. Elas aparecem em cinza numa faixa à esquerda das cordas, o que ajuda a perceber um MIDI na oitava errada (use *Transpose* nas configurações).
   - Notas acima de A♯5 aparecem em cinza na corda Mi, onde seriam tocadas em posições mais altas.
-- **Painel inferior:** acende a corda que está soando, com o dedo e a nota.
+- **Painel inferior:** acende a corda que está soando, com o número e a nota.
 - O nome das notas segue a opção *Note labels* (None / Alphabetical / Fixed Do).
 - Todo o resto do Sightread continua funcionando: velocidade, loop, metrônomo, seleção de faixas e espera.
 
@@ -35,7 +36,7 @@ A visão de violino é a padrão. Para trocar de visão, use o menu *Visualizer*
 Todas as regras ficam em [`src/features/violin/config.ts`](src/features/violin/config.ts):
 
 - `maxSemitones` de cada corda define até onde ela toca. Com 7, o 4º dedo vira alternativa à corda solta seguinte e a corda solta é a preferida.
-- `fingerBySemitone` define qual dedo usar para cada semitom.
+- `blockNumber` escolhe o número do bloco: `'semitones'` (0–6, padrão) ou `'finger'` (dedo da 1ª posição, 0–3, definido em `fingerBySemitone`).
 - `belowRange` (`'lane'` ou `'discard'`) e `aboveRange` (`'top-string'`, `'lane'` ou `'discard'`) definem o que fazer com notas fora da extensão.
 
 A decisão de corda/dedo está em [`placement.ts`](src/features/violin/placement.ts), com testes. O desenho está em [`src/features/SongVisualization/violin.ts`](src/features/SongVisualization/violin.ts).

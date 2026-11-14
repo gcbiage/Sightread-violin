@@ -100,6 +100,21 @@ export function placeViolinNote(midiNote: number, config: ViolinConfig): ViolinP
   }
 }
 
+/**
+ * The number shown inside a falling block, or null when the note has none (notes in the extra
+ * lanes, and notes past the top of the range, which show their name instead).
+ */
+export function getBlockNumber(placement: ViolinPlacement, config: ViolinConfig): number | null {
+  if (placement.stringIndex === null || placement.semitones === null) {
+    return null
+  }
+  const max = config.strings[placement.stringIndex].maxSemitones
+  if (placement.semitones > max) {
+    return null
+  }
+  return config.blockNumber === 'finger' ? placement.finger : placement.semitones
+}
+
 /** Which extra lanes the current config needs, from left to right. */
 export function getViolinLanes(config: ViolinConfig): ViolinLane[] {
   const lanes: ViolinLane[] = []
